@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Security.Policy;
+
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -9,10 +10,13 @@ using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
+using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
+
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "Build main",
@@ -50,16 +54,25 @@ class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
+            DotNetClean(s => s
+            .SetProject(Solution)
+                .SetConfiguration(Configuration));
         });
 
     Target Restore => _ => _
         .Executes(() =>
         {
+            DotNetRestore(s => s
+                .SetProjectFile(Solution));
         });
 
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
         {
+            DotNetBuild(s => s
+                .SetProjectFile(Solution)
+                .SetConfiguration(Configuration)
+                .EnableNoRestore());
         });
 }
