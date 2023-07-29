@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Build Schema",
   "$ref": "#/definitions/build",
+  "title": "Build Schema",
   "definitions": {
     "build": {
       "type": "object",
@@ -74,6 +74,7 @@
             "enum": [
               "Clean",
               "Compile",
+              "Publish",
               "Restore"
             ]
           }
@@ -90,6 +91,7 @@
             "enum": [
               "Clean",
               "Compile",
+              "Publish",
               "Restore"
             ]
           }

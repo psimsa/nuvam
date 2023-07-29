@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Security.Policy;
+
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -9,19 +10,23 @@ using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
+using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
+
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "Build main",
     GitHubActionsImage.UbuntuLatest,
     OnPushBranches = new[] { "main" },
     OnPullRequestBranches = new[] { "main" },
+    PublishArtifacts = true,
     InvokedTargets = new[]
     {
-        nameof(Clean), nameof(Compile)
+        nameof(Clean), nameof(Compile), nameof(Publish)
         // , nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish)
     },
     // ImportSecrets = new[] { nameof(NuGetApiKey) },
@@ -40,6 +45,8 @@ class Build : NukeBuild
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
+    readonly AbsolutePath OutputDirectory = RootDirectory / "output";
+
     // [Parameter][Secret] readonly string NuGetApiKey;
 
     GitHubActions GitHubActions => GitHubActions.Instance;
@@ -50,16 +57,34 @@ class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
+            DotNetClean(s => s
+            .SetProject(Solution)
+                .SetConfiguration(Configuration));
         });
 
     Target Restore => _ => _
         .Executes(() =>
         {
+            DotNetRestore(s => s
+                .SetProjectFile(Solution));
         });
 
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
         {
+            DotNetBuild(s => s
+                .SetProjectFile(Solution)
+                .SetConfiguration(Configuration)
+                .EnableNoRestore());
         });
+
+    Target Publish => _ => _
+        .DependsOn(Compile)
+        .Produces(OutputDirectory)
+        .Executes(() =>
+            DotNetPublish(s => s.SetProject(Solution.src.Nuvam)
+            .SetConfiguration(Configuration)
+            .SetOutput(OutputDirectory)
+            .EnableNoRestore()));
 }
