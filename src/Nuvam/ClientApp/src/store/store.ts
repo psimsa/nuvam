@@ -4,11 +4,11 @@ import { api } from '../services/apiService'
 import appReducer from './appSlice'
 
 export const store = configureStore({
-    reducer: {
-        app: appReducer,
-        [api.reducerPath]: api.reducer
-    },
-    enhancers: [applyMiddleware(api.middleware)]
+  reducer: {
+    app: appReducer,
+    [api.reducerPath]: api.reducer
+  },
+  enhancers: [applyMiddleware(api.middleware)]
 })
 
 export type RootState = ReturnType<typeof store.getState>
