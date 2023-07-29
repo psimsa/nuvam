@@ -1,3 +1,3 @@
 export interface MessageModel {
-    message: string;
+  message: string
 }
