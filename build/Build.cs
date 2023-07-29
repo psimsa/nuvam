@@ -23,6 +23,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     GitHubActionsImage.UbuntuLatest,
     OnPushBranches = new[] { "main" },
     OnPullRequestBranches = new[] { "main" },
+    PublishArtifacts = true,
     InvokedTargets = new[]
     {
         nameof(Clean), nameof(Compile), nameof(Publish)
@@ -80,6 +81,7 @@ class Build : NukeBuild
 
     Target Publish => _ => _
         .DependsOn(Compile)
+        .Produces(OutputDirectory)
         .Executes(() =>
             DotNetPublish(s => s.SetProject(Solution.src.Nuvam)
             .SetConfiguration(Configuration)
