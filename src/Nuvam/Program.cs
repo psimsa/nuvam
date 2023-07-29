@@ -17,10 +17,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+app.MapGet("/api/hello", async () =>
+{
+    await Task.Delay(1000);
+    return Results.Ok(new { message = "Hello World!" });
+});
 
 app.MapFallbackToFile("index.html");
 
