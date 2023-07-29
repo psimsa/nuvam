@@ -25,7 +25,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     OnPullRequestBranches = new[] { "main" },
     InvokedTargets = new[]
     {
-        nameof(Clean), nameof(Compile)
+        nameof(Clean), nameof(Compile), nameof(Publish)
         // , nameof(Pack), nameof(PublishToGitHubNuget), nameof(Publish)
     },
     // ImportSecrets = new[] { nameof(NuGetApiKey) },
@@ -43,6 +43,8 @@ class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
+
+    readonly AbsolutePath OutputDirectory = RootDirectory / "output";
 
     // [Parameter][Secret] readonly string NuGetApiKey;
 
@@ -75,4 +77,12 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .EnableNoRestore());
         });
+
+    Target Publish => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+            DotNetPublish(s => s.SetProject(Solution.src.Nuvam)
+            .SetConfiguration(Configuration)
+            .SetOutput(OutputDirectory)
+            .EnableNoRestore()));
 }
